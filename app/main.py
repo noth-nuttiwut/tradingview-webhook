@@ -2,7 +2,6 @@
 from fastapi import FastAPI, Body
 from pprint import pprint
 from os import environ
-# from secretcode import F_API_KEY, F_API_SC, ByBit_KEY2, ByBit_SC2
 from ParseMessage import OrderMesssage
 from BybitFutures import NBybitFuture
 from BinanceFutures import NBinanceFuture
@@ -50,20 +49,15 @@ app.add_middleware(
 )
 
 
-# site = AdminSite(settings=Settings(database_url_async='sqlite+aiosqlite:///amisadmin.db'))
-# scheduler = SchedulerAdmin.bind(site)
-# site.mount_app(app)
-
-# mail_handler = MailHandler()
-
-
 #####################################################
 #### API ###
 @app.get("/")
 async def root():
-    print("Check Bybit :: ")
-    print(bybit_client.get_balance())
     return {"message": f"Hello World -- {datetime.now()}"}
+
+@app.get("/health")
+async def check_health():
+    return {"message": f"Still Alive -- {datetime.now()}"}
 
 @app.post("/alert-hook")
 async def alert_hook(body: str = Body(..., media_type='text/plain')):
@@ -94,29 +88,7 @@ async def alert_hook(body: str = Body(..., media_type='text/plain')):
 #####################################################
 
 
-
-
-#####################################################
-### JOB SCHEDULE
-# @scheduler.scheduled_job('interval', seconds=15)
-# def check_email():
-#     now = datetime.now()
-#     print("[INFO ] CheckE-Mail ...", now)
-#     mail_handler.read_mail(last_checked=now)
-#     print("[INFO ] Done . ")
-
-
-# @app.on_event("startup")
-# async def startup():
-#     # Start the scheduled task scheduler
-#     scheduler.start()
-
-#####################################################
-
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="localhost", port=8008)
     
-    
-    
-# curl -H 'Content-Type: text/plain; charset=utf-8' -d '' -X POST http://127.0.0.1:8008/alert-hook
