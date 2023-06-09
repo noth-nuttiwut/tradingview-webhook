@@ -1,0 +1,7 @@
+MailServer.code-workspace
+secretcode.py
+.env
+/old
+/upload
+/__pycache__
+.DS_Store
