@@ -5,3 +5,4 @@ secretcode.py
 /upload
 /__pycache__
 .DS_Store
+/app/__pycache__/*.pyc

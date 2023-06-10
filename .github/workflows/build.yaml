@@ -26,5 +26,5 @@ jobs:
         GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
       run: |
         gcloud auth configure-docker asia-southeast1-docker.pkg.dev
-        docker build -t asia-southeast1-docker.pkg.dev/$GOOGLE_PROJECT/tv-bot-trade/n-tv-webhook:latest .
-        docker push asia-southeast1-docker.pkg.dev/$GOOGLE_PROJECT/tv-bot-trade/n-tv-webhook:latest
+        docker build -t asia-southeast1-docker.pkg.dev/$GOOGLE_PROJECT/tv-bot-trade/n-tv-webhook:1.0.3 .
+        docker push asia-southeast1-docker.pkg.dev/$GOOGLE_PROJECT/tv-bot-trade/n-tv-webhook:1.0.3

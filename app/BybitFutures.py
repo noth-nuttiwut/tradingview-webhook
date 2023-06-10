@@ -126,7 +126,7 @@ class NBybitFuture:
             'retMsg': 'OK',
             'time': 1686130540125}
         """
-        qty = self.get_position(symbol=symbol).get("size", 0)
+        qty = self.get_position(symbol=symbol).get("size", "0").replace(" ", "")
         print("qty")
         if qty in [0, "0"]:
             print(f"[ INFO  ] Bybit : No Open order ")
@@ -167,8 +167,7 @@ class NBybitFuture:
             'retMsg': 'OK',
             'time': 1686130540125}
         """
-        qty = self.get_position(symbol=symbol).get("size", 0)
-        print("qty")
+        qty = self.get_position(symbol=symbol).get("size", "0").replace(" ", "")
         if qty in [0, "0"]:
             print(f"[ INFO  ] Bybit : No Open order ")
             return {}

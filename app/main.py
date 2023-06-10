@@ -26,11 +26,17 @@ class Side(Enum):
     Sell = "SELL"
     Buy = "BUY"
     
+    def __str__(self) -> str:
+        return self.value
+    
 class Action(Enum):
     OpenShort = "OS"
     OpenLong = "OL"
     CloseShort = "CS"
     CloseLong = "CL"
+    
+    def __str__(self) -> str:
+        return self.value
     
     
 
@@ -64,22 +70,29 @@ async def alert_hook(body: str = Body(..., media_type='text/plain')):
     order = OrderMesssage(body)
     client = um_futures_client if order.exchange == "BINANCE" else bybit_client
     print()
-    
-    if order.message == "CS":
-        print("--------- CLOSE SHORT ---------")
-        client.close_short(symbol=order.symbol)
-    
-    elif order.message == "CL":
-        print("--------- CLOSE LONG ---------")
-        client.close_long(symbol=order.symbol)
-    else:
-        if order.side == Side.Sell.value:
-            print("--------- OPEN SHORT ---------")
-            client.open_short(symbol=order.symbol)  
-        else:
-            print("--------- OPEN LONG ---------")
-            client.open_long(symbol=order.symbol)
     pprint(order.json)
+    print()
+    try:
+        if order.message == Action.CloseShort:
+            print("--------- CLOSE SHORT ---------")
+            client.close_short(symbol=order.symbol)
+        
+        elif order.message == Action.CloseLong:
+            print("--------- CLOSE LONG ---------")
+            client.close_long(symbol=order.symbol)
+        else:
+            if order.side == Side.Sell:
+                print("--------- OPEN SHORT ---------")
+                client.open_short(symbol=order.symbol)  
+            else:
+                print("--------- OPEN LONG ---------")
+                client.open_long(symbol=order.symbol)
+    except Exception as e:
+        print(e)
+        print("---"*10)
+        print()
+        return {"status": 500, "message" : f"{e}"}
+    
     print("---"*10)
     print()
     return {"status": 200, "message" : "OK"}
@@ -90,5 +103,5 @@ async def alert_hook(body: str = Body(..., media_type='text/plain')):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8008)
+    uvicorn.run(app, host="localhost", port=8080)
     
