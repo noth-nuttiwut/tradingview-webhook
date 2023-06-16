@@ -1,7 +1,19 @@
-FROM tiangolo/uvicorn-gunicorn:python3.10-slim
+FROM python:3.10.12-slim
 
-COPY requirements.txt /tmp/requirements.txt
 
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+WORKDIR /webhook
 
-COPY ./app /app
+
+COPY ./requirements.txt /webhook/requirements.txt
+
+
+RUN pip install --upgrade pip
+
+
+RUN pip install --no-cache-dir --upgrade -r /webhook/requirements.txt
+
+
+COPY ./app /webhook/app
+
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]

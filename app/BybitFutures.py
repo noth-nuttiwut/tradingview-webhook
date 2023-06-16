@@ -3,24 +3,36 @@ from pprint import pprint
 from enum import Enum
 
 class Category(Enum):
-    linear = "linear"
+    Linear = "linear"
+    Inverse = "inverse"
+    
+    def __str__(self) -> str:
+        return self.value
 
 class AccoutType(Enum):
     unitfied = "UNIFIED"
+    
+    def __str__(self) -> str:
+        return self.value
 
 
 class Side(Enum):
     Sell = "Sell"
     Buy = "Buy"
+    
+    def __str__(self) -> str:
+        return self.value
 
 class Type(Enum):
     Market = "Market"
     Limit = "LIMIT"
+    
+    def __str__(self) -> str:
+        return self.value
 
 class NBybitFuture:
     
     def __init__(self, api_key, secret, testnet=True):
-        url = "https://api-testnet.bybit.com" if testnet else "https://api.bybit.com"
         self.client_ss = HTTP(
         testnet=testnet,
         api_key=api_key,
@@ -66,7 +78,8 @@ class NBybitFuture:
             print(f"[ INFO  ] Bybit : {result.get('retMsg', '')} ")
             return {}
 
-        return self.c_pprint(result["result"]["list"][0], name="Balance", filter_keys=["totalAvailableBalance", "totalMarginBalance"])
+        filter_keys = ["totalAvailableBalance", "totalMarginBalance", "totalPerpUPL", "totalInitialMargin", "totalMaintenanceMargin"]
+        return self.c_pprint(result["result"]["list"][0], name="Balance", filter_keys=filter_keys)
          
     
     def get_ticker(self, symbol="ARBUSDT"):
@@ -78,28 +91,55 @@ class NBybitFuture:
         Returns:
             ============================== ARBUSDT ==============================
 
-            {'ask1Price': '1.1665',
-            'bid1Price': '1.1664',
-            'indexPrice': '1.1635',
-            'markPrice': '1.1666',
+            {'a': [["16638.64", "0.008479"]],
+            'b': [["16638.27", "0.305749"]],
+            'ts': '1672765737733',
             'symbol': 'ARBUSDT'}
 
             ============================================================
         """
-        result = self.client_ss.get_tickers(
-            category=Category.linear.value,
+        result = self.client_ss.get_orderbook(
+            category=f"{Category.Linear}",
             symbol=symbol,
+            limit=10
         )
+        """
+        Response 
+
+        {
+            "retCode": 0,
+            "retMsg": "OK",
+            "result": {
+                "s": "BTCUSDT",
+                "a": [
+                    [
+                        "16638.64",
+                        "0.008479"
+                    ]
+                ],
+                "b": [
+                    [
+                        "16638.27",
+                        "0.305749"
+                    ]
+                ],
+                "ts": 1672765737733,
+                "u": 5277055
+            },
+            "retExtInfo": {},
+            "time": 1672765737734
+        }
+        """
         
         if result.get("retMsg", None) != "OK": 
             print(f"[ INFO  ] Bybit : {result.get('retMsg', '')} ")
             return {}
 
-        return self.c_pprint(result["result"]["list"][0], name=symbol, filter_keys=["symbol", "ask1Price", "bid1Price", "markPrice", "indexPrice"])
+        return self.c_pprint(result["result"], name=symbol, filter_keys=["s", "a", "b", "ts"])
     
     def get_position(self, symbol="ARBUSDT"):
         response = self.client_ss.get_positions(
-            category=Category.linear.value,
+            category=f"{Category.Linear}",
             symbol=symbol,
         )
 
@@ -127,16 +167,16 @@ class NBybitFuture:
             'time': 1686130540125}
         """
         qty = self.get_position(symbol=symbol).get("size", "0").replace(" ", "")
-        print("qty")
+        print("qty :: ", qty)
         if qty in [0, "0"]:
             print(f"[ INFO  ] Bybit : No Open order ")
             return {}
         
         response = self.client_ss.place_order(
-            category=Category.linear.value,
+            category=f"{Category.Linear}",
             symbol=symbol,
-            side=Side.Sell.value,
-            orderType=Type.Market.value,
+            side=f"{Side.Sell}",
+            orderType=f"{Type.Market}",
             qty=qty,
             timeInForce="GTC",
             takeProfit="0",
@@ -173,10 +213,10 @@ class NBybitFuture:
             return {}
         
         response = self.client_ss.place_order(
-            category=Category.linear.value,
+            category=f"{Category.Linear}",
             symbol=symbol,
-            side=Side.Buy.value,
-            orderType=Type.Market.value,
+            side=f"{Side.Buy}",
+            orderType=f"{Type.Market}",
             qty=qty,
             timeInForce="GTC",
             takeProfit="0",
@@ -191,7 +231,7 @@ class NBybitFuture:
     
     
     
-    def open_long(self, qty=0, percent=1, symbol="ARBUSDT"):
+    def open_long(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250):
         """_summary_
 
         Args:
@@ -212,24 +252,26 @@ class NBybitFuture:
             print(f"[INFO  ] Bybit : Balance is 0")
             return {}
         
-        bid_price = float(self.get_ticker(symbol=symbol).get("bid1Price", 0))
+        bid_price = float(self.get_ticker(symbol=symbol).get("b", [[0, 0]])[0][0])
         
         if bid_price == 0:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
         if qty == 0:
-            qty = balance *  percent / bid_price
+            qty = round((balance *  percent) / bid_price, 2)
         
+        # Calculate stop loss
+        stop_loss_price = (balance - max_loss) / qty
         response = self.client_ss.place_order(
-            category=Category.linear.value,
+            category=f"{Category.Linear}",
             symbol=symbol,
-            side=Side.Buy.value,
-            orderType=Type.Market.value,
-            qty=f'{qty: 0.2f}',
+            side=f"{Side.Buy}",
+            orderType=f"{Type.Market}",
+            qty=f'{qty:0.2f}',
             timeInForce="GTC",
             takeProfit="0",
-            stopLoss="0",
+            stopLoss=f'0',
         ) 
         
         if response.get("retMsg", None) != "OK": 
@@ -241,30 +283,33 @@ class NBybitFuture:
         
         
         
-    def open_short(self, qty=0, percent=1, symbol="ARBUSDT"):
+    def open_short(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250):
         balance = float(self.get_balance().get("totalAvailableBalance", 0))
         if balance == 0:
             print(f"[INFO  ] Bybit : Balance is 0")
             return {}
         
-        bid_price = float(self.get_ticker(symbol=symbol).get("ask1Price", 0))
+        bid_price = float(self.get_ticker(symbol=symbol).get("a", [[0, 0]])[0][0])
         
         if bid_price == 0:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
         if qty == 0:
-            qty = balance *  percent / bid_price
+            qty = round((balance *  percent) / bid_price, 2)
+            
+        # Calculate stop loss
+        stop_loss_price = (balance + max_loss) / qty
         
         response = self.client_ss.place_order(
-            category=Category.linear.value,
+            category=f"{Category.Linear}",
             symbol=symbol,
-            side=Side.Sell.value,
-            orderType=Type.Market.value,
-            qty=f'{qty: 0.2f}',
+            side=f"{Side.Sell}",
+            orderType=f"{Type.Market}",
+            qty=f'{qty:0.2f}',
             timeInForce="GTC",
             takeProfit="0",
-            stopLoss="0",
+            stopLoss=f'0',
         ) 
         
         if response.get("retMsg", None) != "OK": 
@@ -278,13 +323,10 @@ def main():
     from os import environ
     SYMBOL = "ARBUSDT"
     n_bybit_client = NBybitFuture(api_key=environ["BYBIT_API_KEY"], secret=environ["BYBIT_API_SECRET"])
-    # n_bybit_client.open_long(symbol=SYMBOL)
-    n_bybit_client.get_balance()
+
+    n_bybit_client.close_long(symbol=SYMBOL)
+    
 
     
-    # n_bybit_client.get_position(symbol=SYMBOL)
-    
-    # n_bybit_client.close_short(symbol=SYMBOL)
-
 if __name__ == "__main__":
     main()
