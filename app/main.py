@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, Body, Header
+from fastapi import FastAPI, Body, Header, Request
 from pprint import pprint
 from os import environ
 from app.ParseMessage import OrderMesssage
@@ -75,8 +75,10 @@ def verify_jwt(jwt_str, secret, api_key):
 #####################################################
 #### API ###
 @app.get("/")
-async def root():
-    return {"message": f"Hello World -- TESTNET : {TESTNET} {datetime.now()}"}
+async def main(request: Request):
+    user_ip = request.headers.get('CF-Connecting-IP', request.client.host)
+    country = request.headers.get('CF-IPCountry', "nowhere")
+    return {"message": f"Hello  {user_ip} from {country} -- TESTNET : {TESTNET} {datetime.now()}"}
 
 @app.get("/health")
 async def check_health():
