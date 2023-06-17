@@ -2,3 +2,4 @@ pybit
 fastapi[all]
 binance-futures-connector
 pyjwt
+uvicorn[standard]
