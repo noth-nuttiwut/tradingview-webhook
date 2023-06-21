@@ -9,7 +9,7 @@ class OrderMesssage:
     self.raw_message = message
     self.__dict = self.parse()
 
-  def parse(self):
+  def parse(self, ignore_uppercase_key=["JWT"]):
     result = {}
     key_values = self.raw_message.split(", ")
     for kv in key_values:
@@ -18,12 +18,12 @@ class OrderMesssage:
         continue
         
       if "." not in v:
-        result[k] = v.upper()  
+        result[k] = v if k in ignore_uppercase_key else v.upper()  
       else:
         try:
           result[k] = float(v)
         except Exception as e:
-          result[k] = v.upper()
+          result[k] = v if k in ignore_uppercase_key else v.upper() 
       
     return result
 
@@ -49,7 +49,12 @@ class OrderMesssage:
 
   @property
   def message(self):
-    return self.__dict.get("message", None)
+    msg = self.__dict.get("message", None)
+    if not msg:
+      return msg
+    
+    order_splitted = msg.split(" - ")
+    return order_splitted[0]
 
   @property
   def id(self):

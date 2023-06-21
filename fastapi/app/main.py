@@ -10,6 +10,15 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import decode
 
+import ssl 
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
 BINANCE_API_KEY = environ.get("BINANCE_API_KEY", None)
 BINANCE_API_SECRET = environ.get("BINANCE_API_SECRET", None)
 BYBIT_API_KEY = environ.get("BYBIT_API_KEY", None)
@@ -92,8 +101,10 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     pprint(order.json)
     print()
     
-    if not verify_jwt(jwt, REPL_API_SECRET, REPL_API_KEY):
+    
+    if not any([verify_jwt(jwt, REPL_API_SECRET, REPL_API_KEY), verify_jwt(order.jwt, REPL_API_SECRET, REPL_API_KEY)]):
         return {"status": 403, "message" : "Authentication Error"}
+    
     try:
         if order.message == f"{Action.CloseShortOpenLong}":
             print("--------- CLOSE SHORT -->  OPEN LONG ---------")

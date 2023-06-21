@@ -1,0 +1,40 @@
+# To build the entire stack run 'make run'
+
+version: '3.7'
+
+services:
+  fastapi:
+    container_name: fastapi_container
+    restart: unless-stopped
+    build:
+      context: ./fastapi
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    
+    env_file:
+      ./fastapi/.env
+
+  caddy:
+    container_name: caddy_container
+    restart: unless-stopped
+    build:
+      context: ./caddy
+      dockerfile: ./Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./data/caddy_data:/data
+      - ./data/caddy_config:/config
+    depends_on:
+      - fastapi
+      
+    environment:
+      PROXY_BACKEND: fastapi
+      PROXY_PORT: 8000
+      DOMAIN: ${DOMAIN}
+
+volumes:
+  caddy_data:
+  caddy_config:
