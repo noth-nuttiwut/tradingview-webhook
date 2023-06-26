@@ -93,7 +93,7 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     print()
     
     
-    if not any([verify_jwt(jwt, PROXY_API_SECRET, PROXY_API_KEY), verify_jwt(order.jwt, PROXY_API_SECRET, PROXY_API_KEY)]):
+    if not verify_jwt(jwt, PROXY_API_SECRET, PROXY_API_KEY):
         return {"status": 403, "message" : "Authentication Error"}
     
     try:
