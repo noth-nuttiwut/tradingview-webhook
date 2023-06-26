@@ -66,8 +66,9 @@ app.add_middleware(
 
 def verify_jwt(jwt_str, secret, api_key):
     try:
+        print("JWT :: ", jwt_str)
         result = decode(jwt_str, secret, algorithms=["HS256"])
-        print(result)
+        print("Decode ::", result)
         return api_key == result.get("apiKey", None)
     except Exception as e:
         return False
@@ -91,7 +92,6 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     print()
     pprint(order.json)
     print()
-    
     
     if not verify_jwt(jwt, PROXY_API_SECRET, PROXY_API_KEY):
         return {"status": 403, "message" : "Authentication Error"}
