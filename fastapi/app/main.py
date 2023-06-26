@@ -14,8 +14,8 @@ BINANCE_API_KEY = environ.get("BINANCE_API_KEY", None)
 BINANCE_API_SECRET = environ.get("BINANCE_API_SECRET", None)
 BYBIT_API_KEY = environ.get("BYBIT_API_KEY", None)
 BYBIT_API_SECRET = environ.get("BYBIT_API_SECRET", None)
-REPL_API_KEY = environ.get("REPL_API_KEY", None)
-REPL_API_SECRET = environ.get("REPL_API_SECRET", None)
+PROXY_API_KEY = environ.get("PROXY_API_KEY", None)
+PROXY_API_SECRET = environ.get("PROXY_API_SECRET", None)
 TESTNET = bool(environ.get("TESTNET", 0))
 LEVERAGE = float(environ.get("LEVERAGE", 1))
 
@@ -93,7 +93,7 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     print()
     
     
-    if not any([verify_jwt(jwt, REPL_API_SECRET, REPL_API_KEY), verify_jwt(order.jwt, REPL_API_SECRET, REPL_API_KEY)]):
+    if not any([verify_jwt(jwt, PROXY_API_SECRET, PROXY_API_KEY), verify_jwt(order.jwt, PROXY_API_SECRET, PROXY_API_KEY)]):
         return {"status": 403, "message" : "Authentication Error"}
     
     try:
