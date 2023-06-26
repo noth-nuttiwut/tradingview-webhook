@@ -67,6 +67,10 @@ class OrderMesssage:
   @property
   def jwt(self):
     return self.__dict.get("JWT", None)
+  
+  @property
+  def balance(self):
+    return self.__dict.get("balance", None)
 
 
 if __name__ == "__main__":

@@ -10,15 +10,6 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import decode
 
-import ssl 
-
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
 BINANCE_API_KEY = environ.get("BINANCE_API_KEY", None)
 BINANCE_API_SECRET = environ.get("BINANCE_API_SECRET", None)
 BYBIT_API_KEY = environ.get("BYBIT_API_KEY", None)
@@ -149,4 +140,5 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="localhost", port=8080)
-    
+
+

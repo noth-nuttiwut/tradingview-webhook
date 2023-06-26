@@ -231,7 +231,7 @@ class NBybitFuture:
     
     
     
-    def open_long(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250):
+    def open_long(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0):
         """_summary_
 
         Args:
@@ -258,8 +258,11 @@ class NBybitFuture:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
-        if qty == 0:
+        if qty == 0 and order_size == 0:
             qty = round((balance *  percent) / bid_price, 2)
+        
+        elif qty == 0 and order_size > 0:
+            qty = round(order_size / bid_price, 2)
         
         # Calculate stop loss
         stop_loss_price = (balance - max_loss) / qty
@@ -283,7 +286,7 @@ class NBybitFuture:
         
         
         
-    def open_short(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250):
+    def open_short(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0):
         balance = float(self.get_balance().get("totalAvailableBalance", 0))
         if balance == 0:
             print(f"[INFO  ] Bybit : Balance is 0")
@@ -295,8 +298,11 @@ class NBybitFuture:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
-        if qty == 0:
-            qty = round((balance *  percent) / bid_price, 2)
+        if qty == 0 and order_size == 0:
+            qty = round( (balance *  percent) / bid_price, 2)
+        
+        elif qty == 0 and order_size > 0:
+            qty = round( order_size / bid_price, 2)
             
         # Calculate stop loss
         stop_loss_price = (balance + max_loss) / qty

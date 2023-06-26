@@ -8,3 +8,4 @@ secretcode.py
 .DS_Store
 /app/__pycache__/*.pyc
 /app/test_request.py
+*.js

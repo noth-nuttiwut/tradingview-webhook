@@ -15,5 +15,6 @@ RUN pip install --no-cache-dir --upgrade -r /webhook/requirements.txt
 
 COPY ./app /webhook/app
 
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
