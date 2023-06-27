@@ -100,12 +100,18 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
         if order.message == f"{Action.CloseShortOpenLong}":
             print("--------- CLOSE SHORT -->  OPEN LONG ---------")
             client.close_short(symbol=order.symbol)
-            client.open_long(symbol=order.symbol, percent=LEVERAGE)
+            if order.balance:
+                client.open_long(symbol=order.symbol, order_size=order.balance)
+            else:
+                client.open_long(symbol=order.symbol, percent=LEVERAGE)
             
         elif order.message == f"{Action.CloseLongOpenShort}":
             print("--------- CLOSE LONG -->  OPEN SHORT ---------")
             client.close_long(symbol=order.symbol)
-            client.open_short(symbol=order.symbol, percent=LEVERAGE)  
+            if order.balance:
+                client.open_short(symbol=order.symbol, order_size=order.balance)  
+            else:
+                client.open_short(symbol=order.symbol, percent=LEVERAGE)  
             
         elif order.message == f"{Action.CloseShort}":
             print("--------- CLOSE SHORT ---------")
@@ -131,7 +137,7 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     
     print("---"*10)
     print()
-    return {"status": 200, "message" : "OK"}
+    return {"status": 200, "message" : f"OK"}
 
 
 #####################################################
