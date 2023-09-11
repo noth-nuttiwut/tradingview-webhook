@@ -259,10 +259,10 @@ class NBybitFuture:
             return {}
         
         if qty == 0 and order_size == 0:
-            qty = round((balance *  percent) / bid_price, 2)
+            qty = round((balance *  percent) / bid_price, 1)
         
         elif qty == 0 and order_size > 0:
-            qty = round(order_size / bid_price, 2)
+            qty = round(order_size / bid_price, 1)
         
         # Calculate stop loss
         stop_loss_price = (balance - max_loss) / qty
@@ -299,10 +299,10 @@ class NBybitFuture:
             return {}
         
         if qty == 0 and order_size == 0:
-            qty = round( (balance *  percent) / bid_price, 2)
+            qty = round( (balance *  percent) / bid_price, 1)
         
         elif qty == 0 and order_size > 0:
-            qty = round( order_size / bid_price, 2)
+            qty = round( order_size / bid_price, 1)
             
         # Calculate stop loss
         stop_loss_price = (balance + max_loss) / qty

@@ -121,11 +121,12 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
             print("--------- CLOSE LONG ---------")
             client.close_long(symbol=order.symbol)
             
-        else:
+        elif order.message == f"{Action.OpenShort}":
             if order.side == Side.Sell.value:
                 print("--------- OPEN SHORT ---------")
                 client.open_short(symbol=order.symbol, percent=LEVERAGE)  
-            else:
+                
+        elif order.message == f"{Action.OpenLong}":
                 print("--------- OPEN LONG ---------")
                 client.open_long(symbol=order.symbol, percent=LEVERAGE)
                 
