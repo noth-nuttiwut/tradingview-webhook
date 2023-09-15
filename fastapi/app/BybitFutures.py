@@ -231,7 +231,7 @@ class NBybitFuture:
     
     
     
-    def open_long(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0):
+    def open_long(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0, tp=0, sl=0):
         """_summary_
 
         Args:
@@ -252,29 +252,32 @@ class NBybitFuture:
             print(f"[INFO  ] Bybit : Balance is 0")
             return {}
         
-        bid_price = float(self.get_ticker(symbol=symbol).get("b", [[0, 0]])[0][0])
+        price_n_vol = self.get_ticker(symbol=symbol).get("b", [[0, 0]])[0]  # get bid price 
+        price = float(price_n_vol[0])
+        vol = price_n_vol[1]
+        vDigit = vol[::-1].find('.')
         
-        if bid_price == 0:
+        if price == 0:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
         if qty == 0 and order_size == 0:
-            qty = round((balance *  percent) / bid_price, 1)
+            qty = round((balance *  percent) / price, vDigit)
         
         elif qty == 0 and order_size > 0:
-            qty = round(order_size / bid_price, 1)
+            qty = round(order_size / price, vDigit)
         
         # Calculate stop loss
-        stop_loss_price = (balance - max_loss) / qty
+
         response = self.client_ss.place_order(
             category=f"{Category.Linear}",
             symbol=symbol,
             side=f"{Side.Buy}",
             orderType=f"{Type.Market}",
-            qty=f'{qty:0.2f}',
+            qty=f'{qty}',
             timeInForce="GTC",
-            takeProfit="0",
-            stopLoss=f'0',
+            takeProfit=f"{tp}",
+            stopLoss=f"{sl}"
         ) 
         
         if response.get("retMsg", None) != "OK": 
@@ -284,38 +287,37 @@ class NBybitFuture:
         return self.c_pprint(response["result"], name=f"[ {symbol} ] OPEN ORDER", filter_keys=[])
     
         
-        
-        
-    def open_short(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0):
+    def open_short(self, qty=0, percent=1, symbol="ARBUSDT", max_loss=250, order_size=0, tp=0, sl=0):
         balance = float(self.get_balance().get("totalAvailableBalance", 0))
         if balance == 0:
             print(f"[INFO  ] Bybit : Balance is 0")
             return {}
         
-        bid_price = float(self.get_ticker(symbol=symbol).get("a", [[0, 0]])[0][0])
+        price_n_vol = self.get_ticker(symbol=symbol).get("a", [[0, 0]])[0]  # get bid price 
+        price = float(price_n_vol[0])
+        vol = price_n_vol[1]
+        vDigit = vol[::-1].find('.')
         
-        if bid_price == 0:
+        if price == 0:
             print(f"[INFO  ] Bybit : cannot get bid1Price of {symbol}")
             return {}
         
         if qty == 0 and order_size == 0:
-            qty = round( (balance *  percent) / bid_price, 1)
+            qty = round( (balance *  percent) / price, vDigit)
         
         elif qty == 0 and order_size > 0:
-            qty = round( order_size / bid_price, 1)
-            
-        # Calculate stop loss
-        stop_loss_price = (balance + max_loss) / qty
+            qty = round( order_size / price, vDigit)
+
         
         response = self.client_ss.place_order(
             category=f"{Category.Linear}",
             symbol=symbol,
             side=f"{Side.Sell}",
             orderType=f"{Type.Market}",
-            qty=f'{qty:0.2f}',
+            qty=f'{qty}',
             timeInForce="GTC",
-            takeProfit="0",
-            stopLoss=f'0',
+            takeProfit=f"{tp}",
+            stopLoss=f"{sl}"
         ) 
         
         if response.get("retMsg", None) != "OK": 

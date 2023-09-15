@@ -46,6 +46,14 @@ class OrderMesssage:
   @property
   def side(self):
     return self.__dict.get("side", None)
+  
+  @property
+  def tp(self):
+    return self.__dict.get("tp", None)
+  
+  @property
+  def sl(self):
+    return self.__dict.get("sl", None)
 
   @property
   def message(self):
