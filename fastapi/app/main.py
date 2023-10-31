@@ -12,8 +12,10 @@ from jwt import decode
 
 BINANCE_API_KEY = environ.get("BINANCE_API_KEY", None)
 BINANCE_API_SECRET = environ.get("BINANCE_API_SECRET", None)
-BYBIT_API_KEY = environ.get("BYBIT_API_KEY", None)
-BYBIT_API_SECRET = environ.get("BYBIT_API_SECRET", None)
+MAIN_BYBIT_API_KEY = environ.get("MAIN_BYBIT_API_KEY", None)
+MAIN_BYBIT_API_SECRET = environ.get("MAIN_BYBIT_API_SECRET", None)
+TEST_BYBIT_API_KEY = environ.get("MAIN_BYBIT_API_KEY", None)
+TEST_BYBIT_API_SECRET = environ.get("MAIN_BYBIT_API_SECRET", None)
 PROXY_API_KEY = environ.get("PROXY_API_KEY", None)
 PROXY_API_SECRET = environ.get("PROXY_API_SECRET", None)
 TESTNET = bool(environ.get("TESTNET", 0))
@@ -22,10 +24,16 @@ LEVERAGE = float(environ.get("LEVERAGE", 1))
 um_futures_client = NBinanceFuture(api_key=BINANCE_API_KEY, 
                                    secret=BINANCE_API_SECRET, 
                                    url="https://testnet.binance.vision/api")
-bybit_client = NBybitFuture(
-    api_key=BYBIT_API_KEY,
-    secret=BYBIT_API_SECRET,
-    testnet=TESTNET
+bybit_client_mainnet = NBybitFuture(
+    api_key=MAIN_BYBIT_API_KEY,
+    secret=MAIN_BYBIT_API_SECRET,
+    testnet=False
+)
+
+bybit_client_testnet = NBybitFuture(
+    api_key=TEST_BYBIT_API_KEY,
+    secret=TEST_BYBIT_API_SECRET,
+    testnet=True
 )
 
 class Side(Enum):
@@ -35,6 +43,13 @@ class Side(Enum):
     def __str__(self) -> str:
         return self.value
 
+class Exchange(Enum):
+    Bybit = "BYBIT"
+    Binance = "BINANCE"
+
+class Network(Enum):
+    Mainnet = "MAINNET"
+    Testnet = "TESTNET"
     
 class Action(Enum):
     OpenShort = "OS"
@@ -88,10 +103,19 @@ async def check_health():
 @app.post("/alert-hook")
 async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | None = Header(default=None)):
     order = OrderMesssage(body)
-    client = um_futures_client if order.exchange == "BINANCE" else bybit_client
+    
+    client = None 
+    if order.exchange == Exchange.Binance.value:
+        client = um_futures_client
+    elif order.exchange == Exchange.Bybit.value:
+        client = bybit_client_mainnet if order.network == Network.Mainnet.value else bybit_client_testnet
+    
     print()
     pprint(order.json)
     print()
+    
+    if not client:
+        return {"status": 403, "message" : "Network Not Found"}
     
     if not verify_jwt(jwt, PROXY_API_SECRET, PROXY_API_KEY):
         return {"status": 403, "message" : "Authentication Error"}
@@ -129,6 +153,8 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
         elif order.message == f"{Action.OpenLong}":
                 print("--------- OPEN LONG ---------")
                 client.open_long(symbol=order.symbol, percent=LEVERAGE)
+        else:
+            return {"status": 500, "message" : f"Incorrect Action !"}
                 
     except Exception as e:
         print(e)
@@ -138,7 +164,8 @@ async def alert_hook(body: str = Body(..., media_type='text/plain'), jwt: str | 
     
     print("---"*10)
     print()
-    return {"status": 200, "message" : f"OK"}
+    
+    return {"status": 200, "message" : f"No Action"}
 
 
 #####################################################

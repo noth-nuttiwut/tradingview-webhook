@@ -46,14 +46,6 @@ class OrderMesssage:
   @property
   def side(self):
     return self.__dict.get("side", None)
-  
-  @property
-  def tp(self):
-    return self.__dict.get("tp", None)
-  
-  @property
-  def sl(self):
-    return self.__dict.get("sl", None)
 
   @property
   def message(self):
@@ -79,10 +71,22 @@ class OrderMesssage:
   @property
   def balance(self):
     return self.__dict.get("balance", None)
+  
+  @property
+  def network(self):
+    return self.__dict.get("network", None)
+  
+  @property
+  def tp(self):
+    return self.__dict.get("tp", None)
+  
+  @property
+  def sl(self):
+    return self.__dict.get("sl", None)
 
 
 if __name__ == "__main__":
-  order = OrderMesssage("symbol = ARBUSDT, exchange = Binance, side = sell, message = Short-Entry, size = -4000.0")
+  order = OrderMesssage("symbol = ARBUSDT, exchange = Binance, side = sell, message = Short-Entry, size = -4000.0, network = mainnet")
   print(order.symbol, order.exchange, order.side)
   print(order.json)
   

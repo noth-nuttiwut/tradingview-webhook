@@ -331,7 +331,6 @@ def main():
     from os import environ
     SYMBOL = "ARBUSDT"
     n_bybit_client = NBybitFuture(api_key=environ["BYBIT_API_KEY"], secret=environ["BYBIT_API_SECRET"])
-
     n_bybit_client.close_long(symbol=SYMBOL)
     
 
