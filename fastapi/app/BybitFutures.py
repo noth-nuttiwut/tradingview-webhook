@@ -329,11 +329,12 @@ class NBybitFuture:
   
 def main():
     from os import environ
-    SYMBOL = "ARBUSDT"
-    n_bybit_client = NBybitFuture(api_key=environ["BYBIT_API_KEY"], secret=environ["BYBIT_API_SECRET"])
-    n_bybit_client.close_long(symbol=SYMBOL)
+    SYMBOL = "MATICUSDT"
+    TEST_BYBIT_API_KEY="cC02UEf0uq2qdQmZC7"
+    TEST_BYBIT_API_SECRET="eojUkhdpwI5tnFt4Izdnb7WX9riKvQWVud1y"
+    n_bybit_client = NBybitFuture(api_key=TEST_BYBIT_API_KEY, secret=TEST_BYBIT_API_SECRET)
+    n_bybit_client.open_long(symbol=SYMBOL)
     
-
     
 if __name__ == "__main__":
     main()
